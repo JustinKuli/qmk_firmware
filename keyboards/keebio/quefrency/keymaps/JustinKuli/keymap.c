@@ -8,6 +8,11 @@
 #define _L1 1
 #define _L2 2
 
+static bool repeat_is_on = false;
+static uint16_t repeat_timer;
+static bool repeat_state_r = false;
+static bool repeat_state_enter = false;
+
 enum custom_keycodes {
   JK_NA01 = SAFE_RANGE,
   JK_NA02,
@@ -16,6 +21,8 @@ enum custom_keycodes {
   JK_TBL2,
   JK_FACE,
   JK_SHDS,
+  JK_RREP,
+  JK_EREP,
 };
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -46,11 +53,31 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case JK_SHDS:
         send_unicode_string("(つ▀¯▀)つ");
         break;
+    case JK_RREP:
+        repeat_is_on = !repeat_is_on;
+        repeat_state_r = true;
+        repeat_state_enter = false;
+        if (repeat_is_on) {
+            repeat_timer = timer_read();
+        } else {
+            repeat_timer = 0;
+        }
+        break;
+    case JK_EREP:
+        repeat_is_on = !repeat_is_on;
+        repeat_state_enter = true;
+        repeat_state_r = false;
+        if (repeat_is_on) {
+            repeat_timer = timer_read();
+        } else {
+            repeat_timer = 0;
+        }
+        break;
     }
     return true;
 };
 
-enum unicode_names {(
+enum unicode_names {
     HAPP,
     UPSD,
     SADD,
@@ -72,7 +99,7 @@ const uint32_t PROGMEM unicode_map[] = {
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_BASE] = LAYOUT_65_with_macro(
-    JK_NA01, KC_MUTE, KC_GRV,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,        KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  JK_NA02, KC_BSPC, KC_DEL,
+    TG(_L1), KC_ESC,  KC_GRV,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,        KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  JK_NA01, KC_BSPC, KC_DEL,
     X(HAPP), X(UPSD), KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                 KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, KC_BSLS, KC_PGUP,
     X(SADD), X(ANXS), KC_ESC,  KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                 KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,          KC_ENT,  KC_PGDN,
     X(SPRK), X(THMB), KC_LSFT,          KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,        KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH,          KC_RSFT, KC_UP,   KC_MPLY,
@@ -80,11 +107,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   [_L1] = LAYOUT_65_with_macro(
-    _______, UC_MOD,  _______, KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,        KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  _______, _______, _______,
-    _______, _______, _______, _______, _______, _______, _______, _______,               _______, _______, _______, KC_UP,   _______, _______, _______, _______, _______,
-    JK_SHDS, JK_FACE, _______, _______, _______, _______, _______, _______,               _______, _______, KC_LEFT, KC_DOWN, KC_RGHT, _______,          _______, _______,
+    TG(_L1), UC_MOD,  _______, KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,        KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  _______, _______, _______,
+    _______, _______, _______, _______, _______, _______, _______, _______,               JK_RREP, _______, _______, KC_UP,   _______, _______, _______, _______, _______,
+    JK_SHDS, JK_FACE, _______, _______, _______, _______, _______, _______,               _______, _______, KC_LEFT, KC_DOWN, KC_RGHT, _______,          JK_EREP, _______,
     JK_SHRG, _______, _______,          _______, _______, _______, _______, _______,      DM_REC1, DM_PLY1, DM_PLY2, DM_REC2, _______,          _______, _______, _______,
-    JK_TBL2, JK_TBL1, _______, KC_TRNS, _______, _______,          _______,               DM_RSTP, KC_TRNS, KC_TRNS, _______, _______,          _______, _______, _______
+    JK_TBL2, JK_TBL1, _______, KC_TRNS, _______, _______,          KC_ENT,                DM_RSTP, KC_TRNS, KC_TRNS, _______, _______,          _______, _______, _______
   )
 };
 
@@ -109,4 +136,22 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
         }
     }
     return false; // so this encoder behavior overrides keyboard level code.
+}
+
+static int repeat_delay = 100;
+
+void matrix_scan_user(void) {
+    if (repeat_is_on) {
+        if (timer_elapsed(repeat_timer) > repeat_delay) {
+            if (repeat_state_r) {
+                tap_code_delay(KC_R, 30);
+            } else {
+                tap_code_delay(KC_ENT, 30);
+            }
+            if (!repeat_state_enter) {
+                repeat_state_r = !repeat_state_r;
+            }
+            repeat_timer = timer_read();
+        }
+    }
 }
