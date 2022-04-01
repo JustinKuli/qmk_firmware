@@ -85,6 +85,22 @@ enum unicode_names {
     ANXS,
     SPRK,
     THMB,
+    ZLG0,
+    ZLG1,
+    ZLG2,
+    ZLG3,
+    ZLG4,
+    ZLG5,
+    ZLG6,
+    ZLG7,
+    ZLG8,
+    ZLG9,
+    ZLGA,
+    ZLGB,
+    ZLGC,
+    ZLGD,
+    ZLGE,
+    ZLGF,
 };
 
 const uint32_t PROGMEM unicode_map[] = {
@@ -95,6 +111,22 @@ const uint32_t PROGMEM unicode_map[] = {
     [ANXS] = 0x1F630,  // 😰
     [SPRK] = 0x2728,   // ✨
     [THMB] = 0x1F44D,  // 👍
+    [ZLG0] = 0x0303,   // zalgo above
+    [ZLG1] = 0x0305,   // zalgo above
+    [ZLG2] = 0x0309,   // zalgo above
+    [ZLG3] = 0x0306,   // zalgo above
+    [ZLG4] = 0x0310,   // zalgo above
+    [ZLG5] = 0x031A,   // zalgo above
+    [ZLG6] = 0x034A,   // zalgo above
+    [ZLG7] = 0x034B,   // zalgo above
+    [ZLG8] = 0x0318,   // zalgo below
+    [ZLG9] = 0x0321,   // zalgo below
+    [ZLGA] = 0x0327,   // zalgo below
+    [ZLGB] = 0x0330,   // zalgo below
+    [ZLGC] = 0x033C,   // zalgo below
+    [ZLGD] = 0x0356,   // zalgo below
+    [ZLGE] = 0x0347,   // zalgo below
+    [ZLGF] = 0x0362,   // zalgo below
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -108,9 +140,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [_L1] = LAYOUT_65_with_macro(
     TG(_L1), UC_MOD,  _______, KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,        KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  _______, _______, _______,
-    _______, _______, _______, _______, _______, _______, _______, _______,               JK_RREP, _______, _______, KC_UP,   _______, _______, _______, _______, _______,
-    JK_SHDS, JK_FACE, _______, _______, _______, _______, _______, _______,               _______, _______, KC_LEFT, KC_DOWN, KC_RGHT, _______,          JK_EREP, _______,
-    JK_SHRG, _______, _______,          _______, _______, _______, _______, _______,      DM_REC1, DM_PLY1, DM_PLY2, DM_REC2, _______,          _______, _______, _______,
+    _______, _______, _______, X(ZLG1), X(ZLG2), X(ZLG3), X(ZLG4), X(ZLG5),               JK_RREP, _______, KC_UP,   _______, _______, _______, _______, _______, _______,
+    JK_SHDS, JK_FACE, X(ZLG6), X(ZLG7), X(ZLG0), X(ZLG9), X(ZLGA), X(ZLGB),               _______, KC_LEFT, KC_DOWN, KC_RGHT, _______, _______,          JK_EREP, _______,
+    JK_SHRG, _______, _______,          X(ZLGC), X(ZLGD), X(ZLGE), X(ZLGF), X(ZLG8),      DM_REC1, DM_PLY1, DM_PLY2, DM_REC2, _______,          _______, _______, _______,
     JK_TBL2, JK_TBL1, _______, KC_TRNS, _______, _______,          KC_ENT,                DM_RSTP, KC_TRNS, KC_TRNS, _______, _______,          _______, _______, _______
   )
 };
